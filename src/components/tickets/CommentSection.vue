@@ -50,6 +50,9 @@
 import { ref, computed } from 'vue'
 import { useMutation } from '@vue/apollo-composable'
 import { CREATE_COMMENT } from '../../graphql/mutations'
+import { useToast } from 'vue-toastification'
+
+const toast = useToast()
 
 const props = defineProps({
   ticketId: {
@@ -70,7 +73,6 @@ const emit = defineEmits(['comment-added'])
 
 const newComment = ref('')
 const loading = ref(false)
-const toast = useToast() // Optional toast
 
 function formatDate(dateString) {
   return new Date(dateString).toLocaleString()
@@ -83,23 +85,26 @@ async function submitComment() {
   loading.value = true
   try {
     const result = await mutate({
-      ticketId: props.ticketId,
-      content: newComment.value
+      input: {
+        ticketId: props.ticketId,
+        content: newComment.value
+      }
     })
 
     const created = result?.data?.createComment?.comment
     if (created) {
       emit('comment-added', created)
       newComment.value = ''
-      toast.success('Comment posted successfully')
+      toast.success('Comment added successfully!')
     } else {
-      toast.error('Failed to post comment')
+      toast.error('Failed to add comment. Please try again.')
     }
   } catch (err) {
     console.error('Failed to add comment:', err)
-    toast.error('Error posting comment')
+    toast.error('An unexpected error occurred.')
   } finally {
     loading.value = false
   }
 }
+
 </script>

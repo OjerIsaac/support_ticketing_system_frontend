@@ -19,7 +19,6 @@ export default {
       localStorage.removeItem("authToken");
       localStorage.removeItem("authUser");
     },
-
   },
   actions: {
     login({ commit }, { token, user }) {

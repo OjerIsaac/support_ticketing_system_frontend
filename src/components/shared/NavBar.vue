@@ -8,10 +8,7 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
           <li class="nav-item">
-            <router-link class="nav-link" to="/tickets">Tickets</router-link>
-          </li>
-          <li v-if="isAgent" class="nav-item">
-            <router-link class="nav-link" to="/agent">Dashboard</router-link>
+            <router-link class="nav-link" to="/dashboard">Dashboard</router-link>
           </li>
         </ul>
         <ul class="navbar-nav">

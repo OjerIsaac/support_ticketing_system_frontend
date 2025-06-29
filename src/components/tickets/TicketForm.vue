@@ -84,8 +84,6 @@ async function handleSubmit() {
       }
     })
 
-    console.log('GraphQL mutation result:', response)
-
     // Top-level GraphQL errors
     if (response.errors && response.errors.length > 0) {
       error.value = response.errors[0].message

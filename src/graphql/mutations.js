@@ -40,16 +40,19 @@ export const UPDATE_TICKET_STATUS = gql`
 `;
 
 export const CREATE_COMMENT = gql`
-  mutation CreateComment($ticketId: ID!, $content: String!) {
-    createComment(ticketId: $ticketId, content: $content) {
-      id
-      content
-      createdAt
-      user {
+  mutation CreateComment($input: CreateCommentInput!) {
+    createComment(input: $input) {
+      comment {
         id
-        name
-        role
+        content
+        createdAt
+        user {
+          id
+          name
+          role
+        }
       }
+      errors
     }
   }
 `;

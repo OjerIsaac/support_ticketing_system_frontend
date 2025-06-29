@@ -17,7 +17,6 @@
               <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               Login
             </button>
-            <p v-if="error" class="text-danger mt-2">{{ error }}</p>
           </form>
         </div>
       </div>
@@ -30,6 +29,7 @@ import { ref } from 'vue'
 import { useMutation } from '@vue/apollo-composable'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
+import { useToast } from 'vue-toastification'     
 import { LOGIN_USER } from '../../graphql/mutations'
 
 const email = ref('')
@@ -39,6 +39,7 @@ const loading = ref(false)
 
 const router = useRouter()
 const store = useStore()
+const toast = useToast()  
 
 const { mutate } = useMutation(LOGIN_USER)
 
@@ -56,7 +57,9 @@ async function handleSubmit() {
     console.log('GraphQL mutation result:', result)
 
     if (result.errors && result.errors.length > 0) {
-      error.value = result.errors[0].message
+      const msg = result.errors[0].message || 'Login failed'
+      error.value = msg
+      toast.error(msg)         
       return
     }
 
@@ -64,17 +67,20 @@ async function handleSubmit() {
 
     if (!loginResult) {
       error.value = 'Unexpected server response'
+      toast.error('Unexpected server response')
       return
     }
 
     if (loginResult.errors && loginResult.errors.length > 0) {
-      error.value = loginResult.errors[0]
+      const msg = loginResult.errors[0] || 'Login failed'
+      error.value = msg
+      toast.error(msg)
       return
     }
 
-
     if (!loginResult.token || !loginResult.user) {
       error.value = 'Login failed'
+      toast.error('Login failed')
       return
     }
 
@@ -85,14 +91,18 @@ async function handleSubmit() {
     store.commit('auth/setToken', token)
     store.commit('auth/setUser', user)
 
-    router.push('/tickets')
+    toast.success(`Welcome back, ${user.name}!`) 
+
+    router.push('/dashboard')
 
   } catch (err) {
     console.error('GraphQL mutation error:', err)
-    error.value = err.message || 'Login failed'
+    const msg = err.message || 'Login failed'
+    error.value = msg
+    toast.error(msg)
   } finally {
     loading.value = false
   }
 }
-
 </script>
+

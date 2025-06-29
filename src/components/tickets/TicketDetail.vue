@@ -11,16 +11,14 @@
       </p>
       <p><strong>Created at:</strong> {{ formatDate(ticket.createdAt) }}</p>
 
-      <div class="actions" v-if="userRole === 'agent'">
-        <button @click="updateStatus('in_progress')">Mark In Progress</button>
-        <button @click="updateStatus('closed')">Close Ticket</button>
-      </div>
-
       <CommentSection
         v-if="canComment"
         :ticketId="ticket.id"
         :comments="ticket.comments"
+        :canComment="canComment"
+        @comment-added="onCommentAdded"
       />
+
     </div>
 
     <div v-else>
@@ -49,15 +47,18 @@ export default {
   const store = useStore();
   const ticketId = route.params.id;
 
-  const { result, loading } = useQuery(GET_TICKET, { id: ticketId });
+  const { result, loading, refetch } = useQuery(GET_TICKET, { id: ticketId });
   const ticket = computed(() => result.value?.ticket || null);
+
+  function onCommentAdded() {
+    refetch()
+  }
 
   const userRole = computed(() => store.getters["auth/userRole"]);
   const userId = computed(() => store.getters["auth/userId"]);
 
   const canComment = computed(() => {
     if (!ticket.value) return false;
-    console.log("DEBUG userRole =", userRole.value);
     if (userRole.value === "agent") return true;
     return ticket.value.comments.some(comment => comment.user.role === "agent");
   });
@@ -66,7 +67,7 @@ export default {
     if (!ticket.value) return "";
     return {
       "bg-success": ticket.value.status === "closed",
-      "bg-warning": ticket.value.status === "in_progress",
+      "bg-warning": ticket.value.status === "pending",
       "bg-danger": ticket.value.status === "open"
     };
   });
@@ -93,8 +94,9 @@ export default {
     canComment,
     statusBadgeClass,
     formatDate,
-    updateStatus
-  };
+    updateStatus,
+    onCommentAdded
+  }
 }
 
 }
